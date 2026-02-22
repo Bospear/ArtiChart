@@ -1,0 +1,4 @@
+@import './components/Canvas/Canvas.css';
+@import './components/CanvasNode/CanvasNode.css';
+@import './components/NodeDrawer/NodeDrawer.css';
+@import './components/PropertiesDrawer/PropertiesDrawer.css';

@@ -1,0 +1,60 @@
+.artichart-canvas {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #f1f5f9;
+  border-radius: 8px;
+  overflow: hidden;
+  user-select: none;
+  touch-action: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.artichart-canvas__viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  cursor: grab;
+}
+
+.artichart-canvas__viewport:active {
+  cursor: grabbing;
+}
+
+.artichart-canvas__surface {
+  position: absolute;
+  left: 0;
+  top: 0;
+  will-change: transform;
+  pointer-events: auto;
+}
+
+.artichart-canvas__minimap {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.artichart-canvas__minimap-node {
+  position: absolute;
+  background: #94a3b8;
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.artichart-canvas__minimap-viewport {
+  position: absolute;
+  border: 2px solid #3b82f6;
+  background: rgba(59, 130, 246, 0.15);
+  pointer-events: none;
+  box-sizing: border-box;
+}

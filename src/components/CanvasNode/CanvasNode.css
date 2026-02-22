@@ -1,0 +1,76 @@
+.artichart-node {
+  border: 2px solid #475569;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  cursor: default;
+}
+
+.artichart-node--circle {
+  border-radius: 50%;
+}
+
+.artichart-node--square {
+  border-radius: 4px;
+}
+
+.artichart-node--rhombus {
+  border-radius: 0;
+  transform: rotate(45deg);
+}
+
+.artichart-node--parallelogram {
+  border-radius: 0;
+  transform: skewX(-15deg);
+}
+
+.artichart-node--selected {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.artichart-node--preview {
+  opacity: 0.4;
+  border-style: dashed;
+  box-shadow: none;
+}
+
+.artichart-node__tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: #f8fafc;
+  border-radius: 6px;
+  padding: 18px 27px;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 9999;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  min-width: 180px;
+}
+
+.artichart-node__tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 9px solid transparent;
+  border-top-color: #1e293b;
+}
+
+.artichart-node__tooltip-title {
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.artichart-node__tooltip-desc {
+  font-size: 19px;
+  font-weight: 400;
+  color: #94a3b8;
+  margin-top: 6px;
+  line-height: 1.5;
+}
+

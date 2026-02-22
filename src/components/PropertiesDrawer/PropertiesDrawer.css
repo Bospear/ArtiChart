@@ -1,0 +1,158 @@
+.artichart-props__placeholder {
+  padding: 16px;
+  font-size: 13px;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+
+.artichart-props {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 12px 12px;
+}
+
+.artichart-props__section {
+  padding: 4px 0 8px;
+}
+
+.artichart-props__section-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #475569;
+}
+
+.artichart-props__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.artichart-props__row {
+  display: flex;
+  gap: 8px;
+}
+
+.artichart-props__row .artichart-props__field {
+  flex: 1;
+  min-width: 0;
+}
+
+.artichart-props__label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.artichart-props__input,
+.artichart-props__select {
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  outline: none;
+  background: #f8fafc;
+  color: #1e293b;
+  transition: border-color 0.15s;
+}
+
+.artichart-props__select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2394a3b8'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 24px;
+}
+
+.artichart-props__input:focus,
+.artichart-props__select:focus {
+  border-color: #3b82f6;
+  background-color: #fff;
+}
+
+.artichart-props__input::placeholder {
+  color: #94a3b8;
+}
+
+.artichart-props__preview {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.artichart-props__preview-img {
+  width: 100%;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  object-fit: cover;
+  max-height: 120px;
+}
+
+.artichart-props__clear-btn {
+  align-self: flex-start;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #ef4444;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.artichart-props__clear-btn:hover {
+  background: #fee2e2;
+}
+
+.artichart-props__color {
+  width: 100%;
+  height: 32px;
+  padding: 2px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #f8fafc;
+}
+
+.artichart-props__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.artichart-props__checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #3b82f6;
+  cursor: pointer;
+}
+
+.artichart-props__textarea {
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 13px;
+  font-family: inherit;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  outline: none;
+  background: #f8fafc;
+  color: #1e293b;
+  resize: vertical;
+  transition: border-color 0.15s;
+}
+
+.artichart-props__textarea:focus {
+  border-color: #3b82f6;
+  background: #fff;
+}
+
+.artichart-props__textarea::placeholder {
+  color: #94a3b8;
+}
