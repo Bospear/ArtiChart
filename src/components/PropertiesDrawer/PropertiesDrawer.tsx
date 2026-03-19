@@ -11,6 +11,8 @@ const PropertiesDrawer: React.FC<PropertiesDrawerProps> = ({
   onCanvasChange,
   selectedNode,
   onNodeChange,
+  connectionLabel,
+  onConnectionLabelChange,
   children,
   className = '',
 }) => {
@@ -100,10 +102,34 @@ const PropertiesDrawer: React.FC<PropertiesDrawerProps> = ({
               }
             >
               <option value="circle">Circle</option>
+              <option value="ellipse">Ellipse</option>
               <option value="square">Square</option>
               <option value="rhombus">Rhombus</option>
               <option value="parallelogram">Parallelogram</option>
             </select>
+          </label>
+
+          <label className="artichart-props__field">
+            <span className="artichart-props__label">Label</span>
+            <input
+              className="artichart-props__input"
+              type="text"
+              placeholder="Node label…"
+              value={selectedNode.label || ''}
+              onChange={(e) =>
+                onNodeChange(selectedNode.id, { label: e.target.value || undefined })
+              }
+            />
+          </label>
+
+          <label className="artichart-props__field">
+            <span className="artichart-props__label">Connectors</span>
+            <DebouncedNumberInput
+              className="artichart-props__input"
+              min={0}
+              value={selectedNode.connectorCount ?? 1}
+              onChange={(v) => onNodeChange(selectedNode.id, { connectorCount: v })}
+            />
           </label>
 
           <div className="artichart-props__row">
@@ -202,6 +228,25 @@ const PropertiesDrawer: React.FC<PropertiesDrawerProps> = ({
               </label>
             </>
           )}
+        </div>
+      )}
+
+      {selection?.kind === 'connection' && (
+        <div className="artichart-props">
+          <div className="artichart-props__section">
+            <span className="artichart-props__section-title">Connection</span>
+          </div>
+
+          <label className="artichart-props__field">
+            <span className="artichart-props__label">Label</span>
+            <input
+              className="artichart-props__input"
+              type="text"
+              placeholder="Connection label…"
+              value={connectionLabel || ''}
+              onChange={(e) => onConnectionLabelChange?.(e.target.value)}
+            />
+          </label>
         </div>
       )}
 

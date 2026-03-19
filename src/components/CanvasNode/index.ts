@@ -1,2 +1,2 @@
-export { default as CanvasNode } from './CanvasNode';
+export { default as CanvasNode, getConnectorPositions } from './CanvasNode';
 export type { CanvasNodeProps, CanvasNodeData, NodeShape } from './CanvasNode.types';

@@ -25,3 +25,48 @@ html, body, #root {
   min-width: 0;
   height: 100%;
 }
+
+.connector-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.connector-layer__hit-area {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 16;
+  pointer-events: stroke;
+  cursor: pointer;
+}
+
+.connector-layer__path {
+  fill: none;
+  stroke: #334155;
+  stroke-width: 3;
+  pointer-events: none;
+}
+
+.connector-layer__path--selected {
+  stroke: #2563eb;
+  stroke-width: 3;
+  filter: drop-shadow(0 0 4px rgba(37, 99, 235, 0.5));
+}
+
+.connector-layer__label {
+  font-size: 13px;
+  font-weight: 600;
+  fill: #334155;
+  text-anchor: middle;
+  pointer-events: none;
+  user-select: none;
+}
+
+.connector-layer__draft {
+  fill: none;
+  stroke: #2563eb;
+  stroke-width: 3;
+  stroke-dasharray: 8 5;
+}

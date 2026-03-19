@@ -87,6 +87,7 @@ const Canvas: React.FC<CanvasProps> = ({
   onBackgroundClick,
   onDrop,
   onDragMove,
+  onPointerMove,
   onDragLeave,
   onZoomChange,
 }) => {
@@ -132,6 +133,7 @@ const Canvas: React.FC<CanvasProps> = ({
       const rects: NodeRect[] = [];
       for (const child of Array.from(canvas.children)) {
         const el = child as HTMLElement;
+        if (el.dataset.minimapIgnore === 'true') continue;
         rects.push({
           x: el.offsetLeft,
           y: el.offsetTop,
@@ -333,6 +335,15 @@ const Canvas: React.FC<CanvasProps> = ({
     [onDrop, onDragLeave, screenToCanvas]
   );
 
+  const handlePointerMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (!onPointerMove) return;
+      const pos = screenToCanvas(e.clientX, e.clientY);
+      if (pos) onPointerMove(pos.x, pos.y, e);
+    },
+    [onPointerMove, screenToCanvas]
+  );
+
   return (
     <div
       ref={containerRef}
@@ -342,6 +353,7 @@ const Canvas: React.FC<CanvasProps> = ({
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeaveContainer}
       onDrop={handleDrop}
+      onMouseMove={handlePointerMove}
       data-no-select
     >
       <div

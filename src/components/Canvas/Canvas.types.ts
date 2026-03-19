@@ -33,6 +33,8 @@ export interface CanvasProps {
   onDrop?: (canvasX: number, canvasY: number, e: React.DragEvent) => void;
   /** Called continuously while dragging over the canvas. Receives canvas-space x/y. */
   onDragMove?: (canvasX: number, canvasY: number) => void;
+  /** Called when the mouse moves over the canvas. Receives canvas-space x/y. */
+  onPointerMove?: (canvasX: number, canvasY: number, e: React.MouseEvent) => void;
   /** Called when a drag leaves the canvas area. */
   onDragLeave?: () => void;
   /** Called when the zoom level changes */

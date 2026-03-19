@@ -1,7 +1,7 @@
 export { Canvas } from './components/Canvas';
 export type { CanvasProps, BackgroundType } from './components/Canvas';
 
-export { CanvasNode } from './components/CanvasNode';
+export { CanvasNode, getConnectorPositions } from './components/CanvasNode';
 export type { CanvasNodeProps, CanvasNodeData, NodeShape } from './components/CanvasNode';
 
 export { NodeDrawer } from './components/NodeDrawer';
