@@ -1,0 +1,40 @@
+.artichart-context-menu {
+  min-width: 160px;
+  background: var(--artichart-context-menu-bg, #fff);
+  border: 1px solid var(--artichart-context-menu-border, #e2e8f0);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.artichart-context-menu__item {
+  display: block;
+  width: 100%;
+  padding: 6px 12px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font-size: 13px;
+  color: var(--artichart-context-menu-color, #1a1a1a);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.1s;
+}
+
+.artichart-context-menu__item:hover:not(:disabled) {
+  background: var(--artichart-context-menu-hover-bg, #f3f4f6);
+}
+
+.artichart-context-menu__item:disabled {
+  color: var(--artichart-context-menu-disabled-color, #9ca3af);
+  cursor: default;
+}
+
+.artichart-context-menu__separator {
+  height: 1px;
+  background: var(--artichart-context-menu-border, #e2e8f0);
+  margin: 4px 0;
+}

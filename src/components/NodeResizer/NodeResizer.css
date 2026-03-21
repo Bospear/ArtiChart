@@ -1,0 +1,14 @@
+.artichart-node-resizer__line {
+  border: 1px dashed var(--artichart-resizer-line-color, #3b82f6);
+  border-radius: 2px;
+}
+
+.artichart-node-resizer__handle {
+  background: var(--artichart-resizer-handle-bg, #fff);
+  border: 1.5px solid var(--artichart-resizer-handle-border, #3b82f6);
+  border-radius: 2px;
+}
+
+.artichart-node-resizer__handle:hover {
+  background: var(--artichart-resizer-handle-bg-hover, #3b82f6);
+}

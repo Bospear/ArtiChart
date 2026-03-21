@@ -1,0 +1,13 @@
+.artichart-helper-lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 9998;
+}
+
+.artichart-helper-lines__line {
+  stroke: var(--artichart-helper-line-color, #f43f5e);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+}

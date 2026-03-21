@@ -1,0 +1,26 @@
+.artichart-whiteboard-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+}
+
+.artichart-whiteboard__freehand {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.artichart-whiteboard__freehand--active {
+  opacity: 0.7;
+}
+
+.artichart-whiteboard__rectangle {
+  pointer-events: none;
+}
+
+.artichart-whiteboard__rectangle--active {
+  opacity: 0.7;
+  stroke-dasharray: 4 3;
+}

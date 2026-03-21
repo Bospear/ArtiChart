@@ -1,4 +1,15 @@
+@import './themes/base.css';
 @import './components/Canvas/Canvas.css';
 @import './components/CanvasNode/CanvasNode.css';
 @import './components/NodeDrawer/NodeDrawer.css';
 @import './components/PropertiesDrawer/PropertiesDrawer.css';
+@import './components/Edge/Edge.css';
+@import './components/NodeToolbar/NodeToolbar.css';
+@import './components/NodeResizer/NodeResizer.css';
+@import './components/EdgeToolbar/EdgeToolbar.css';
+@import './components/ContextMenu/ContextMenu.css';
+@import './components/HelperLines/HelperLines.css';
+@import './components/SelectionBox/SelectionBox.css';
+@import './components/Whiteboard/Whiteboard.css';
+@import './components/Controls/Controls.css';
+@import './components/Panel/Panel.css';

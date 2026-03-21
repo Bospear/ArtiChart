@@ -1,0 +1,195 @@
+:root,
+[data-artichart-color-mode='light'] {
+  --artichart-bg: #ffffff;
+  --artichart-surface: #f8fafc;
+  --artichart-text: #1a1a1a;
+  --artichart-text-muted: #64748b;
+  --artichart-border: #e2e8f0;
+
+  --artichart-node-bg: #ffffff;
+  --artichart-node-border: #475569;
+  --artichart-node-selected-outline: #3b82f6;
+  --artichart-node-label-color: #334155;
+
+  --artichart-edge-stroke: #b1b1b7;
+  --artichart-edge-stroke-width: 2;
+  --artichart-edge-stroke-selected: #3b82f6;
+  --artichart-edge-label-bg: #fff;
+  --artichart-edge-label-color: #1a1a1a;
+  --artichart-edge-label-border: #e2e8f0;
+  --artichart-edge-control-point-bg: #fff;
+
+  --artichart-connection-line-stroke: #b1b1b7;
+
+  --artichart-minimap-bg: rgba(255, 255, 255, 0.9);
+  --artichart-minimap-border: #e2e8f0;
+  --artichart-minimap-node: #93c5fd;
+  --artichart-minimap-viewport: rgba(59, 130, 246, 0.3);
+
+  --artichart-toolbar-bg: #fff;
+  --artichart-toolbar-border: #e2e8f0;
+  --artichart-toolbar-color: #374151;
+  --artichart-toolbar-hover-bg: #f3f4f6;
+
+  --artichart-context-menu-bg: #fff;
+  --artichart-context-menu-border: #e2e8f0;
+  --artichart-context-menu-color: #1a1a1a;
+  --artichart-context-menu-hover-bg: #f3f4f6;
+  --artichart-context-menu-disabled-color: #9ca3af;
+
+  --artichart-selection-bg: rgba(59, 130, 246, 0.08);
+  --artichart-selection-border: rgba(59, 130, 246, 0.4);
+
+  --artichart-helper-line-color: #f43f5e;
+
+  --artichart-resizer-line-color: #3b82f6;
+  --artichart-resizer-handle-bg: #fff;
+  --artichart-resizer-handle-border: #3b82f6;
+  --artichart-resizer-handle-bg-hover: #3b82f6;
+
+  --artichart-connector-border: #1d4ed8;
+  --artichart-connector-bg: #fff;
+  --artichart-connector-hover-bg: #dbeafe;
+
+  --artichart-drawer-bg: #fff;
+  --artichart-drawer-border: #e2e8f0;
+  --artichart-drawer-item-bg: #fff;
+  --artichart-drawer-item-border: #e2e8f0;
+  --artichart-drawer-item-hover-bg: #f3f4f6;
+
+  --artichart-canvas-bg: #f1f5f9;
+
+  --artichart-controls-bg: #fff;
+  --artichart-controls-border: #e2e8f0;
+  --artichart-controls-btn-hover: #f3f4f6;
+}
+
+[data-artichart-color-mode='dark'] {
+  --artichart-bg: #0f172a;
+  --artichart-surface: #1e293b;
+  --artichart-text: #f1f5f9;
+  --artichart-text-muted: #94a3b8;
+  --artichart-border: #334155;
+
+  --artichart-node-bg: #1e293b;
+  --artichart-node-border: #94a3b8;
+  --artichart-node-selected-outline: #60a5fa;
+  --artichart-node-label-color: #e2e8f0;
+
+  --artichart-edge-stroke: #64748b;
+  --artichart-edge-stroke-selected: #60a5fa;
+  --artichart-edge-label-bg: #1e293b;
+  --artichart-edge-label-color: #f1f5f9;
+  --artichart-edge-label-border: #334155;
+  --artichart-edge-control-point-bg: #1e293b;
+
+  --artichart-connection-line-stroke: #64748b;
+
+  --artichart-minimap-bg: rgba(15, 23, 42, 0.9);
+  --artichart-minimap-border: #334155;
+  --artichart-minimap-node: #3b82f6;
+  --artichart-minimap-viewport: rgba(96, 165, 250, 0.3);
+
+  --artichart-toolbar-bg: #1e293b;
+  --artichart-toolbar-border: #334155;
+  --artichart-toolbar-color: #e2e8f0;
+  --artichart-toolbar-hover-bg: #334155;
+
+  --artichart-context-menu-bg: #1e293b;
+  --artichart-context-menu-border: #334155;
+  --artichart-context-menu-color: #f1f5f9;
+  --artichart-context-menu-hover-bg: #334155;
+  --artichart-context-menu-disabled-color: #475569;
+
+  --artichart-selection-bg: rgba(96, 165, 250, 0.1);
+  --artichart-selection-border: rgba(96, 165, 250, 0.4);
+
+  --artichart-helper-line-color: #fb7185;
+
+  --artichart-resizer-line-color: #60a5fa;
+  --artichart-resizer-handle-bg: #1e293b;
+  --artichart-resizer-handle-border: #60a5fa;
+  --artichart-resizer-handle-bg-hover: #60a5fa;
+
+  --artichart-connector-border: #60a5fa;
+  --artichart-connector-bg: #1e293b;
+  --artichart-connector-hover-bg: #1e3a5f;
+
+  --artichart-drawer-bg: #1e293b;
+  --artichart-drawer-border: #334155;
+  --artichart-drawer-item-bg: #1e293b;
+  --artichart-drawer-item-border: #334155;
+  --artichart-drawer-item-hover-bg: #334155;
+
+  --artichart-canvas-bg: #0f172a;
+
+  --artichart-controls-bg: #1e293b;
+  --artichart-controls-border: #334155;
+  --artichart-controls-btn-hover: #334155;
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-artichart-color-mode='system'] {
+    --artichart-bg: #0f172a;
+    --artichart-surface: #1e293b;
+    --artichart-text: #f1f5f9;
+    --artichart-text-muted: #94a3b8;
+    --artichart-border: #334155;
+
+    --artichart-node-bg: #1e293b;
+    --artichart-node-border: #94a3b8;
+    --artichart-node-selected-outline: #60a5fa;
+    --artichart-node-label-color: #e2e8f0;
+
+    --artichart-edge-stroke: #64748b;
+    --artichart-edge-stroke-selected: #60a5fa;
+    --artichart-edge-label-bg: #1e293b;
+    --artichart-edge-label-color: #f1f5f9;
+    --artichart-edge-label-border: #334155;
+    --artichart-edge-control-point-bg: #1e293b;
+
+    --artichart-connection-line-stroke: #64748b;
+
+    --artichart-minimap-bg: rgba(15, 23, 42, 0.9);
+    --artichart-minimap-border: #334155;
+    --artichart-minimap-node: #3b82f6;
+    --artichart-minimap-viewport: rgba(96, 165, 250, 0.3);
+
+    --artichart-toolbar-bg: #1e293b;
+    --artichart-toolbar-border: #334155;
+    --artichart-toolbar-color: #e2e8f0;
+    --artichart-toolbar-hover-bg: #334155;
+
+    --artichart-context-menu-bg: #1e293b;
+    --artichart-context-menu-border: #334155;
+    --artichart-context-menu-color: #f1f5f9;
+    --artichart-context-menu-hover-bg: #334155;
+    --artichart-context-menu-disabled-color: #475569;
+
+    --artichart-selection-bg: rgba(96, 165, 250, 0.1);
+    --artichart-selection-border: rgba(96, 165, 250, 0.4);
+
+    --artichart-helper-line-color: #fb7185;
+
+    --artichart-resizer-line-color: #60a5fa;
+    --artichart-resizer-handle-bg: #1e293b;
+    --artichart-resizer-handle-border: #60a5fa;
+    --artichart-resizer-handle-bg-hover: #60a5fa;
+
+    --artichart-connector-border: #60a5fa;
+    --artichart-connector-bg: #1e293b;
+    --artichart-connector-hover-bg: #1e3a5f;
+
+    --artichart-drawer-bg: #1e293b;
+    --artichart-drawer-border: #334155;
+    --artichart-drawer-item-bg: #1e293b;
+    --artichart-drawer-item-border: #334155;
+    --artichart-drawer-item-hover-bg: #334155;
+
+    --artichart-canvas-bg: #0f172a;
+
+    --artichart-controls-bg: #1e293b;
+    --artichart-controls-border: #334155;
+    --artichart-controls-btn-hover: #334155;
+  }
+}

@@ -1,0 +1,14 @@
+.artichart-selection-box {
+  background: var(--artichart-selection-bg, rgba(59, 130, 246, 0.08));
+  border: 1px solid var(--artichart-selection-border, rgba(59, 130, 246, 0.4));
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 9997;
+}
+
+.artichart-lasso-path {
+  fill: var(--artichart-selection-bg, rgba(59, 130, 246, 0.08));
+  stroke: var(--artichart-selection-border, rgba(59, 130, 246, 0.4));
+  stroke-width: 1;
+  pointer-events: none;
+}

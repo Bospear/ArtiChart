@@ -90,6 +90,7 @@ const Canvas: React.FC<CanvasProps> = ({
   onPointerMove,
   onDragLeave,
   onZoomChange,
+  onPanChange,
 }) => {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(initialZoom);
@@ -97,6 +98,10 @@ const Canvas: React.FC<CanvasProps> = ({
   const [isPanning, setIsPanning] = useState(false);
   const [isMinimapDragging, setIsMinimapDragging] = useState(false);
   const [nodeRects, setNodeRects] = useState<NodeRect[]>([]);
+
+  useEffect(() => {
+    onPanChange?.(pan.x, pan.y);
+  }, [pan.x, pan.y, onPanChange]);
 
   const panStart = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
   const didDrag = useRef(false);

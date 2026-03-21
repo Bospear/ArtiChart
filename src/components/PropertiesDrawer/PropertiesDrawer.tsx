@@ -2,6 +2,7 @@ import React from 'react';
 import type { PropertiesDrawerProps } from './PropertiesDrawer.types';
 import type { BackgroundType } from '../Canvas/Canvas.types';
 import type { NodeShape } from '../CanvasNode/CanvasNode.types';
+import { getChildNodes } from '../../utils/grouping';
 import DebouncedNumberInput from './DebouncedNumberInput';
 import './PropertiesDrawer.css';
 
@@ -10,6 +11,7 @@ const PropertiesDrawer: React.FC<PropertiesDrawerProps> = ({
   canvasProps,
   onCanvasChange,
   selectedNode,
+  nodes = [],
   onNodeChange,
   connectionLabel,
   onConnectionLabelChange,
@@ -163,6 +165,19 @@ const PropertiesDrawer: React.FC<PropertiesDrawerProps> = ({
             />
           </label>
 
+          {getChildNodes(selectedNode.id, nodes).length > 0 && (
+            <label className="artichart-props__checkbox">
+              <input
+                type="checkbox"
+                checked={!selectedNode.collapsed}
+                onChange={(e) =>
+                  onNodeChange(selectedNode.id, { collapsed: !e.target.checked })
+                }
+              />
+              <span className="artichart-props__label">Expanded</span>
+            </label>
+          )}
+
           <label className="artichart-props__field">
             <span className="artichart-props__label">Background Color</span>
             <input
@@ -231,10 +246,10 @@ const PropertiesDrawer: React.FC<PropertiesDrawerProps> = ({
         </div>
       )}
 
-      {selection?.kind === 'connection' && (
+      {selection?.kind === 'edge' && (
         <div className="artichart-props">
           <div className="artichart-props__section">
-            <span className="artichart-props__section-title">Connection</span>
+            <span className="artichart-props__section-title">Edge</span>
           </div>
 
           <label className="artichart-props__field">

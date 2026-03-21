@@ -10,8 +10,8 @@ html, body, #root {
   overflow: hidden;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
     Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  color: #1e293b;
-  background: #e2e8f0;
+  color: var(--artichart-text, #1e293b);
+  background: var(--artichart-surface, #e2e8f0);
 }
 
 .app {
@@ -26,47 +26,54 @@ html, body, #root {
   height: 100%;
 }
 
-.connector-layer {
-  position: absolute;
-  left: 0;
-  top: 0;
-  pointer-events: none;
-  overflow: visible;
+/* ---- Top-right toolbar panel ---- */
+
+.toolbar-panel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  background: var(--artichart-controls-bg, #fff);
+  border: 1px solid var(--artichart-controls-border, #e2e8f0);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  font-size: 13px;
 }
 
-.connector-layer__hit-area {
-  fill: none;
-  stroke: transparent;
-  stroke-width: 16;
-  pointer-events: stroke;
+.toolbar-panel__label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  color: var(--artichart-text, #374151);
+}
+
+.toolbar-panel__select {
+  padding: 3px 6px;
+  border: 1px solid var(--artichart-border, #d1d5db);
+  border-radius: 4px;
+  background: var(--artichart-node-bg, #fff);
+  color: var(--artichart-text, #374151);
+  font-size: 12px;
   cursor: pointer;
 }
 
-.connector-layer__path {
-  fill: none;
-  stroke: #334155;
-  stroke-width: 3;
-  pointer-events: none;
+.toolbar-panel__btn {
+  padding: 4px 10px;
+  border: 1px solid var(--artichart-border, #d1d5db);
+  border-radius: 4px;
+  background: var(--artichart-node-bg, #fff);
+  color: var(--artichart-text, #374151);
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
 }
 
-.connector-layer__path--selected {
-  stroke: #2563eb;
-  stroke-width: 3;
-  filter: drop-shadow(0 0 4px rgba(37, 99, 235, 0.5));
+.toolbar-panel__btn:hover {
+  background: var(--artichart-toolbar-hover-bg, #f3f4f6);
 }
 
-.connector-layer__label {
-  font-size: 13px;
-  font-weight: 600;
-  fill: #334155;
-  text-anchor: middle;
-  pointer-events: none;
-  user-select: none;
-}
-
-.connector-layer__draft {
-  fill: none;
-  stroke: #2563eb;
-  stroke-width: 3;
-  stroke-dasharray: 8 5;
+.toolbar-panel__info {
+  color: var(--artichart-text-muted, #9ca3af);
+  font-size: 12px;
 }

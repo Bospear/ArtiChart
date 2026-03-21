@@ -1,0 +1,91 @@
+.artichart-edge-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.artichart-edge__path {
+  fill: none;
+  stroke: var(--artichart-edge-stroke, #b1b1b7);
+  stroke-width: var(--artichart-edge-stroke-width, 2);
+  pointer-events: visibleStroke;
+  cursor: pointer;
+  transition: stroke 0.15s, stroke-width 0.15s;
+}
+
+.artichart-edge__path--selected {
+  stroke: var(--artichart-edge-stroke-selected, #3b82f6);
+  stroke-width: calc(var(--artichart-edge-stroke-width, 2) + 0.5);
+}
+
+.artichart-edge__path--animated {
+  stroke-dasharray: 5;
+  animation: artichart-edge-dash 0.5s linear infinite;
+}
+
+@keyframes artichart-edge-dash {
+  to {
+    stroke-dashoffset: -10;
+  }
+}
+
+.artichart-edge__hit-area {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 20;
+  pointer-events: visibleStroke;
+  cursor: pointer;
+}
+
+.artichart-edge-label-renderer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.artichart-edge__label {
+  position: absolute;
+  pointer-events: all;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+  background: var(--artichart-edge-label-bg, #fff);
+  color: var(--artichart-edge-label-color, #1a1a1a);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--artichart-edge-label-border, #e2e8f0);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.artichart-edge__connection-line {
+  fill: none;
+  stroke: var(--artichart-connection-line-stroke, #b1b1b7);
+  stroke-width: 2;
+  stroke-dasharray: 5 5;
+}
+
+.artichart-edge__marker {
+  fill: var(--artichart-edge-stroke, #b1b1b7);
+  stroke: none;
+}
+
+.artichart-edge__marker--selected {
+  fill: var(--artichart-edge-stroke-selected, #3b82f6);
+}
+
+.artichart-edge__control-point {
+  fill: var(--artichart-edge-control-point-bg, #fff);
+  stroke: var(--artichart-edge-stroke-selected, #3b82f6);
+  stroke-width: 2;
+  cursor: grab;
+  pointer-events: all;
+}
+
+.artichart-edge__control-point:hover {
+  fill: var(--artichart-edge-stroke-selected, #3b82f6);
+}

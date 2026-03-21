@@ -39,4 +39,6 @@ export interface CanvasProps {
   onDragLeave?: () => void;
   /** Called when the zoom level changes */
   onZoomChange?: (zoom: number) => void;
+  /** Called when the pan offset changes */
+  onPanChange?: (panX: number, panY: number) => void;
 }

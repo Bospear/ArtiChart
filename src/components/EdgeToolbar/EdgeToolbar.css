@@ -1,0 +1,29 @@
+.artichart-edge-toolbar {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--artichart-toolbar-bg, #fff);
+  border: 1px solid var(--artichart-toolbar-border, #e2e8f0);
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.artichart-edge-toolbar button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--artichart-toolbar-color, #374151);
+  transition: background 0.15s;
+}
+
+.artichart-edge-toolbar button:hover {
+  background: var(--artichart-toolbar-hover-bg, #f3f4f6);
+}

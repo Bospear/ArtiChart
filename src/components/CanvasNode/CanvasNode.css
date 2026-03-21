@@ -28,6 +28,50 @@
   transform: skewX(-15deg);
 }
 
+.artichart-node--rectangle {
+  border-radius: 8px;
+}
+
+.artichart-node--triangle,
+.artichart-node--hexagon,
+.artichart-node--diamond,
+.artichart-node--star {
+  border: none;
+  background: #fff;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
+}
+
+.artichart-node--triangle::before,
+.artichart-node--hexagon::before,
+.artichart-node--diamond::before,
+.artichart-node--star::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  clip-path: inherit;
+  background: #475569;
+  z-index: -1;
+}
+
+.artichart-node--cylinder {
+  border-radius: 0;
+  border: 2px solid #475569;
+  border-top: none;
+  overflow: visible;
+}
+
+.artichart-node__cylinder-cap {
+  position: absolute;
+  top: -10px;
+  left: -2px;
+  right: -2px;
+  height: 20px;
+  background: inherit;
+  border: 2px solid #475569;
+  border-radius: 50%;
+  z-index: 1;
+}
+
 .artichart-node--selected {
   outline: 2px solid #3b82f6;
   outline-offset: 2px;

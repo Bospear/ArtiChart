@@ -29,7 +29,14 @@
     "chart",
     "charts",
     "visualization",
-    "artichart"
+    "artichart",
+    "canvas",
+    "node",
+    "edge",
+    "graph",
+    "flow",
+    "diagram",
+    "whiteboard"
   ],
   "author": "Bospear",
   "license": "MIT",
@@ -47,11 +54,11 @@
     "vite": "^5.4.2",
     "vite-plugin-dts": "^4.0.3"
   },
-  "dependencies": {
-    "@ai-sdk/mcp": "^1.0.25",
-    "@ai-sdk/openai": "^3.0.41",
-    "@composio/core": "^0.6.5",
-    "@composio/vercel": "^0.6.5",
-    "ai": "^6.0.116"
+  "optionalPeerDependencies": {
+    "dagre": ">=0.8.0",
+    "elkjs": ">=0.8.0",
+    "d3-force": ">=3.0.0",
+    "d3-hierarchy": ">=3.0.0",
+    "html-to-image": ">=1.0.0"
   }
 }

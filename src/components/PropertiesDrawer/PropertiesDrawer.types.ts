@@ -6,7 +6,8 @@ export type Selection =
   | null
   | { kind: 'canvas' }
   | { kind: 'node'; id: string }
-  | { kind: 'connection'; id: string };
+  | { kind: 'edge'; id: string }
+  | { kind: 'multi'; nodeIds: string[]; edgeIds: string[] };
 
 export interface CanvasProperties {
   backgroundType: BackgroundType;
@@ -18,6 +19,7 @@ export interface PropertiesDrawerProps {
   canvasProps: CanvasProperties;
   onCanvasChange: (patch: Partial<CanvasProperties>) => void;
   selectedNode: CanvasNodeData | null;
+  nodes?: CanvasNodeData[];
   onNodeChange: (id: string, patch: Partial<CanvasNodeData>) => void;
   connectionLabel?: string;
   onConnectionLabelChange?: (label: string) => void;

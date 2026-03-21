@@ -45,6 +45,23 @@ export function getConnectorPositions(
   return positions;
 }
 
+function getShapeClipPath(shape: NodeShape): string | undefined {
+  switch (shape) {
+    case 'triangle':
+      return 'polygon(50% 0%, 0% 100%, 100% 100%)';
+    case 'hexagon':
+      return 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)';
+    case 'diamond':
+      return 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)';
+    case 'star':
+      return 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)';
+    case 'cylinder':
+      return undefined;
+    default:
+      return undefined;
+  }
+}
+
 const RESIZE_CURSORS: Record<ResizeEdge, string> = {
   n: 'ns-resize',
   s: 'ns-resize',
@@ -61,6 +78,7 @@ const CanvasNode: React.FC<CanvasNodeProps> = ({
   preview = false,
   connectable = false,
   zoom = 1,
+  children,
   onSelect,
   onMove,
   onConnectStart,
@@ -77,6 +95,12 @@ const CanvasNode: React.FC<CanvasNodeProps> = ({
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
       if (preview || e.button !== 0) return;
+
+      if (node.dragHandle) {
+        const target = e.target as HTMLElement;
+        if (!target.closest(node.dragHandle)) return;
+      }
+
       e.stopPropagation();
       onSelect?.(node.id);
 
@@ -85,7 +109,7 @@ const CanvasNode: React.FC<CanvasNodeProps> = ({
         dragStart.current = { mx: e.clientX, my: e.clientY, nx: node.x, ny: node.y };
       }
     },
-    [preview, node.id, node.x, node.y, onSelect, onMove]
+    [preview, node.id, node.x, node.y, node.dragHandle, onSelect, onMove],
   );
 
   const handleConnectorMouseDown = useCallback(
@@ -96,7 +120,7 @@ const CanvasNode: React.FC<CanvasNodeProps> = ({
       onSelect?.(node.id);
       onConnectStart?.(node.id, connectorIndex);
     },
-    [preview, connectable, onSelect, node.id, onConnectStart]
+    [preview, connectable, onSelect, node.id, onConnectStart],
   );
 
   const handleConnectorMouseUp = useCallback(
@@ -106,7 +130,7 @@ const CanvasNode: React.FC<CanvasNodeProps> = ({
       e.stopPropagation();
       onConnectEnd?.(node.id, connectorIndex);
     },
-    [preview, connectable, node.id, onConnectEnd]
+    [preview, connectable, node.id, onConnectEnd],
   );
 
   const handleNodeMouseUp = useCallback(
@@ -134,7 +158,7 @@ const CanvasNode: React.FC<CanvasNodeProps> = ({
 
       onConnectEnd?.(node.id, nearestIdx);
     },
-    [preview, connectable, node.id, node.connectorCount, node.width, node.height, node.shape, onConnectEnd]
+    [preview, connectable, node.id, node.connectorCount, node.width, node.height, node.shape, onConnectEnd],
   );
 
   const handleResizeMouseDown = useCallback(
@@ -155,7 +179,7 @@ const CanvasNode: React.FC<CanvasNodeProps> = ({
       };
       document.body.style.cursor = RESIZE_CURSORS[edge];
     },
-    [preview, node.id, node.x, node.y, node.width, node.height, onSelect, onResize]
+    [preview, node.id, node.x, node.y, node.width, node.height, onSelect, onResize],
   );
 
   useEffect(() => {
@@ -256,38 +280,56 @@ const CanvasNode: React.FC<CanvasNodeProps> = ({
     };
   }, [preview, node.id, zoom, onMove]);
 
+  if (node.hidden) return null;
+
+  const clipPath = getShapeClipPath(node.shape);
+
   const classes = [
     'artichart-node',
     `artichart-node--${node.shape}`,
     selected && 'artichart-node--selected',
     preview && 'artichart-node--preview',
+    node.className,
   ]
     .filter(Boolean)
     .join(' ');
 
+  const style: React.CSSProperties = {
+    position: 'absolute',
+    left: node.x,
+    top: node.y,
+    width: node.width,
+    height: node.height,
+    zIndex: node.zIndex,
+    backgroundColor: node.backgroundColor || undefined,
+    backgroundImage: node.backgroundImage ? `url(${node.backgroundImage})` : undefined,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    pointerEvents: preview ? 'none' : undefined,
+    cursor: preview ? undefined : 'grab',
+    transform: node.rotation ? `rotate(${node.rotation}deg)` : undefined,
+    clipPath: clipPath || undefined,
+    ...node.style,
+  };
+
+  const isCylinder = node.shape === 'cylinder';
+
   return (
     <div
       className={classes}
-      style={{
-        position: 'absolute',
-        left: node.x,
-        top: node.y,
-        width: node.width,
-        height: node.height,
-        zIndex: node.zIndex,
-        backgroundColor: node.backgroundColor || undefined,
-        backgroundImage: node.backgroundImage ? `url(${node.backgroundImage})` : undefined,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        pointerEvents: preview ? 'none' : undefined,
-        cursor: preview ? undefined : 'grab',
-      }}
+      style={style}
       onMouseDown={handleMouseDown}
       onMouseUp={handleNodeMouseUp}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
+      {isCylinder && (
+        <div className="artichart-node__cylinder-cap" />
+      )}
+
+      {children}
+
       {node.label && !preview && (
         <div className="artichart-node__label">{node.label}</div>
       )}

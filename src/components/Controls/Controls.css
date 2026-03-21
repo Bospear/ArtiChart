@@ -1,0 +1,45 @@
+.artichart-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px;
+  background: var(--artichart-controls-bg, #fff);
+  border: 1px solid var(--artichart-controls-border, #e2e8f0);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  user-select: none;
+}
+
+.artichart-controls__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--artichart-toolbar-color, #374151);
+  transition: background 0.15s;
+}
+
+.artichart-controls__btn:hover {
+  background: var(--artichart-controls-btn-hover, #f3f4f6);
+}
+
+.artichart-controls__btn--active {
+  background: var(--artichart-controls-btn-hover, #f3f4f6);
+}
+
+.artichart-controls__zoom-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--artichart-text-muted, #64748b);
+  padding: 2px 4px;
+  white-space: nowrap;
+}
