@@ -80,6 +80,7 @@ const CanvasNode: React.FC<CanvasNodeProps> = ({
   zoom = 1,
   children,
   onSelect,
+  onDoubleClick,
   onMove,
   onConnectStart,
   onConnectEnd,
@@ -91,6 +92,18 @@ const CanvasNode: React.FC<CanvasNodeProps> = ({
   const isResizing = useRef(false);
   const resizeEdgeRef = useRef<ResizeEdge>('e');
   const resizeStart = useRef({ mx: 0, my: 0, x: 0, y: 0, w: 0, h: 0 });
+
+  const handleDoubleClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (preview || !onDoubleClick) return;
+      const t = e.target as HTMLElement;
+      if (t.closest('.artichart-node__connector-handle')) return;
+      if (t.closest('.artichart-node__resize-edge')) return;
+      e.stopPropagation();
+      onDoubleClick(node.id);
+    },
+    [preview, onDoubleClick, node.id],
+  );
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
@@ -320,6 +333,7 @@ const CanvasNode: React.FC<CanvasNodeProps> = ({
       className={classes}
       style={style}
       onMouseDown={handleMouseDown}
+      onDoubleClick={handleDoubleClick}
       onMouseUp={handleNodeMouseUp}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

@@ -33,6 +33,25 @@ import type {
   ContextMenuItem,
 } from '../src';
 import './App.css';
+import FilesTreePanel from './FilesTreePanel';
+import {
+  buildFilesRecord,
+  DATA_KEY_CHILD_CANVAS,
+  DATA_KEY_LINK_RECT,
+  defaultChildCanvasPath,
+  MAIN_CANVAS_FILE,
+  type CanvasFileParentRef,
+} from './canvasFileStore';
+import {
+  buildWorkspaceSnapshot,
+  downloadWorkspaceJson,
+  loadWorkspaceFromStorage,
+  maxNumericSuffix,
+  restoreClosedFromSnapshot,
+  saveWorkspaceToStorage,
+  snapshotToRestoredTabs,
+  type RestoredTabPayload,
+} from './workspaceSnapshot';
 
 const DEFAULT_SIZE = 60;
 const CANVAS_W = 3000;
@@ -148,54 +167,515 @@ interface HistoryEntry {
   edges: EdgeData[];
 }
 
+interface WorkspaceTab {
+  id: string;
+  /** Virtual JSON path for this canvas document. */
+  filePath: string;
+  parentRef?: CanvasFileParentRef;
+  /** Set when this tab was opened via double-click on this node id (another canvas). */
+  linkedNodeId?: string;
+  nodes: CanvasNodeData[];
+  edges: EdgeData[];
+  cvProps: CanvasProperties;
+  zoom: number;
+  selection: Selection;
+  dragPreview: { x: number; y: number } | null;
+  connectorDraft: ConnectionDraft | null;
+  movingNodeId: string | null;
+  locked: boolean;
+  past: HistoryEntry[];
+  future: HistoryEntry[];
+}
+
+interface AppWorkspace {
+  tabs: WorkspaceTab[];
+  activeTabId: string;
+  /** Closed linked canvases keyed by the source node's id. */
+  closedCanvases: Record<string, RestoredTabPayload>;
+}
+
+const INITIAL_TAB_ID = 'tab-initial';
+
+function createWorkspaceTab(
+  id: string,
+  name: string,
+  nodes: CanvasNodeData[],
+  edges: EdgeData[],
+  opts?: {
+    linkedNodeId?: string;
+    filePath?: string;
+    parentRef?: CanvasFileParentRef;
+  },
+): WorkspaceTab {
+  const filePath =
+    opts?.filePath ??
+    (opts?.linkedNodeId
+      ? defaultChildCanvasPath(opts.linkedNodeId)
+      : MAIN_CANVAS_FILE);
+  return {
+    id,
+    filePath,
+    ...(opts?.linkedNodeId !== undefined ? { linkedNodeId: opts.linkedNodeId } : {}),
+    ...(opts?.parentRef !== undefined ? { parentRef: opts.parentRef } : {}),
+    nodes,
+    edges,
+    cvProps: {
+      name,
+      backgroundType: 'dotted',
+      backgroundImage: '',
+    },
+    zoom: 0.5,
+    selection: null,
+    dragPreview: null,
+    connectorDraft: null,
+    movingNodeId: null,
+    locked: false,
+    past: [],
+    future: [],
+  };
+}
+
+function toWorkspaceTab(r: RestoredTabPayload): WorkspaceTab {
+  const filePath =
+    r.filePath ??
+    (r.linkedNodeId
+      ? defaultChildCanvasPath(r.linkedNodeId)
+      : MAIN_CANVAS_FILE);
+  return {
+    ...r,
+    filePath,
+    parentRef: r.parentRef ?? undefined,
+    selection: null,
+    dragPreview: null,
+    connectorDraft: null,
+    movingNodeId: null,
+    locked: false,
+    past: [],
+    future: [],
+  };
+}
+
+function tabToRestoredPayload(tab: WorkspaceTab): RestoredTabPayload {
+  return {
+    id: tab.id,
+    filePath: tab.filePath,
+    ...(tab.parentRef !== undefined ? { parentRef: tab.parentRef } : {}),
+    ...(tab.linkedNodeId !== undefined ? { linkedNodeId: tab.linkedNodeId } : {}),
+    cvProps: { ...tab.cvProps },
+    zoom: tab.zoom,
+    nodes: tab.nodes.map((n) => ({ ...n })),
+    edges: tab.edges.map((e) => ({ ...e })),
+  };
+}
+
 const App: React.FC = () => {
-  const [selection, setSelection] = useState<Selection>(null);
-  const [cvProps, setCvProps] = useState<CanvasProperties>({
-    backgroundType: 'dotted',
-    backgroundImage: '',
+  const initialTab = useMemo(
+    () =>
+      createWorkspaceTab(
+        INITIAL_TAB_ID,
+        'Canvas 1',
+        buildInitialNodes(),
+        buildInitialEdges(),
+        { filePath: MAIN_CANVAS_FILE },
+      ),
+    [],
+  );
+
+  const [workspace, setWorkspace] = useState<AppWorkspace>(() => {
+    const loaded = loadWorkspaceFromStorage();
+    if (loaded && loaded.tabs.length > 0) {
+      const { tabs: restored, activeTabId } = snapshotToRestoredTabs(loaded);
+      const tabs = restored.map((r, i) => {
+        const t = toWorkspaceTab(r);
+        const filePath =
+          r.filePath ??
+          (t.linkedNodeId
+            ? defaultChildCanvasPath(t.linkedNodeId)
+            : i === 0
+              ? MAIN_CANVAS_FILE
+              : `/project/canvases/tab-${t.id}.canvas.json`);
+        return { ...t, filePath };
+      });
+      const closedCanvases = restoreClosedFromSnapshot(loaded);
+      const { nextNode, nextEdge } = maxNumericSuffix(tabs, closedCanvases);
+      nextId = Math.max(nextId, nextNode);
+      nextEdgeId = Math.max(nextEdgeId, nextEdge);
+      return { tabs, activeTabId, closedCanvases };
+    }
+    return { tabs: [initialTab], activeTabId: initialTab.id, closedCanvases: {} };
   });
-  const [nodes, setNodes] = useState<CanvasNodeData[]>(buildInitialNodes);
-  const [edges, setEdges] = useState<EdgeData[]>(buildInitialEdges);
-  const [zoom, setZoom] = useState(0.5);
-  const [dragPreview, setDragPreview] = useState<{ x: number; y: number } | null>(null);
-  const [connectorDraft, setConnectorDraft] = useState<ConnectionDraft | null>(null);
+
+  const { tabs, activeTabId, closedCanvases } = workspace;
+  const activeTab = useMemo(
+    () => tabs.find((t) => t.id === activeTabId)!,
+    [tabs, activeTabId],
+  );
+
+  const virtualFiles = useMemo(
+    () => buildFilesRecord(tabs, closedCanvases),
+    [tabs, closedCanvases],
+  );
+
+  const rootFilePath = tabs[0]?.filePath ?? MAIN_CANVAS_FILE;
+
+  const [leftDrawerTab, setLeftDrawerTab] = useState<'nodes' | 'files'>('nodes');
+
+  const {
+    nodes,
+    edges,
+    cvProps,
+    zoom,
+    selection,
+    dragPreview,
+    connectorDraft,
+    movingNodeId,
+    locked,
+    past,
+    future,
+  } = activeTab;
+
+  const setSelection = useCallback((updater: React.SetStateAction<Selection>) => {
+    setWorkspace((w) => ({
+      ...w,
+      tabs: w.tabs.map((t) => {
+        if (t.id !== w.activeTabId) return t;
+        const next =
+          typeof updater === 'function'
+            ? (updater as (s: Selection) => Selection)(t.selection)
+            : updater;
+        return { ...t, selection: next };
+      }),
+    }));
+  }, []);
+
+  const setCvProps = useCallback((patch: Partial<CanvasProperties>) => {
+    setWorkspace((w) => ({
+      ...w,
+      tabs: w.tabs.map((t) =>
+        t.id === w.activeTabId ? { ...t, cvProps: { ...t.cvProps, ...patch } } : t,
+      ),
+    }));
+  }, []);
+
+  const setNodes = useCallback((updater: React.SetStateAction<CanvasNodeData[]>) => {
+    setWorkspace((w) => ({
+      ...w,
+      tabs: w.tabs.map((t) => {
+        if (t.id !== w.activeTabId) return t;
+        const next = typeof updater === 'function' ? updater(t.nodes) : updater;
+        return { ...t, nodes: next };
+      }),
+    }));
+  }, []);
+
+  const setEdges = useCallback((updater: React.SetStateAction<EdgeData[]>) => {
+    setWorkspace((w) => ({
+      ...w,
+      tabs: w.tabs.map((t) => {
+        if (t.id !== w.activeTabId) return t;
+        const next = typeof updater === 'function' ? updater(t.edges) : updater;
+        return { ...t, edges: next };
+      }),
+    }));
+  }, []);
+
+  const setZoom = useCallback((updater: React.SetStateAction<number>) => {
+    setWorkspace((w) => ({
+      ...w,
+      tabs: w.tabs.map((t) => {
+        if (t.id !== w.activeTabId) return t;
+        const next = typeof updater === 'function' ? updater(t.zoom) : updater;
+        return { ...t, zoom: next };
+      }),
+    }));
+  }, []);
+
+  const setDragPreview = useCallback(
+    (updater: React.SetStateAction<{ x: number; y: number } | null>) => {
+      setWorkspace((w) => ({
+        ...w,
+        tabs: w.tabs.map((t) => {
+          if (t.id !== w.activeTabId) return t;
+          const next =
+            typeof updater === 'function' ? updater(t.dragPreview) : updater;
+          return { ...t, dragPreview: next };
+        }),
+      }));
+    },
+    [],
+  );
+
+  const setConnectorDraft = useCallback(
+    (updater: React.SetStateAction<ConnectionDraft | null>) => {
+      setWorkspace((w) => ({
+        ...w,
+        tabs: w.tabs.map((t) => {
+          if (t.id !== w.activeTabId) return t;
+          const next =
+            typeof updater === 'function' ? updater(t.connectorDraft) : updater;
+          return { ...t, connectorDraft: next };
+        }),
+      }));
+    },
+    [],
+  );
+
+  const setMovingNodeId = useCallback(
+    (updater: React.SetStateAction<string | null>) => {
+      setWorkspace((w) => ({
+        ...w,
+        tabs: w.tabs.map((t) => {
+          if (t.id !== w.activeTabId) return t;
+          const next =
+            typeof updater === 'function' ? updater(t.movingNodeId) : updater;
+          return { ...t, movingNodeId: next };
+        }),
+      }));
+    },
+    [],
+  );
+
+  const setLocked = useCallback((updater: React.SetStateAction<boolean>) => {
+    setWorkspace((w) => ({
+      ...w,
+      tabs: w.tabs.map((t) => {
+        if (t.id !== w.activeTabId) return t;
+        const next = typeof updater === 'function' ? updater(t.locked) : updater;
+        return { ...t, locked: next };
+      }),
+    }));
+  }, []);
+
+  const selectTab = useCallback((id: string) => {
+    setWorkspace((w) => ({ ...w, activeTabId: id }));
+  }, []);
+
+  const openTabForFile = useCallback(
+    (filePath: string) => {
+      const tab = tabs.find((t) => t.filePath === filePath);
+      if (tab) selectTab(tab.id);
+    },
+    [tabs, selectTab],
+  );
+
+  const closeTab = useCallback((tabId: string) => {
+    setWorkspace((w) => {
+      if (w.tabs.length <= 1) return w;
+      const idx = w.tabs.findIndex((t) => t.id === tabId);
+      if (idx === -1) return w;
+      const removed = w.tabs[idx]!;
+      let nextClosed = w.closedCanvases;
+      if (removed.linkedNodeId) {
+        nextClosed = {
+          ...w.closedCanvases,
+          [removed.linkedNodeId]: tabToRestoredPayload(removed),
+        };
+      }
+      const newTabs = w.tabs.filter((t) => t.id !== tabId);
+      let nextActive = w.activeTabId;
+      if (nextActive === tabId) {
+        nextActive = newTabs[Math.max(0, idx - 1)]!.id;
+      }
+      return {
+        ...w,
+        tabs: newTabs,
+        activeTabId: nextActive,
+        closedCanvases: nextClosed,
+      };
+    });
+  }, []);
+
+  const patchParentNodeLink = (
+    nodes: CanvasNodeData[],
+    nodeId: string,
+    childPath: string,
+  ): CanvasNodeData[] =>
+    nodes.map((n) =>
+      n.id === nodeId
+        ? {
+            ...n,
+            data: {
+              ...(n.data ?? {}),
+              [DATA_KEY_CHILD_CANVAS]: childPath,
+              [DATA_KEY_LINK_RECT]: {
+                x: n.x,
+                y: n.y,
+                width: n.width,
+                height: n.height,
+              },
+            },
+          }
+        : n,
+    );
+
+  const handleNodeDoubleClick = useCallback((nodeId: string) => {
+    setWorkspace((w) => {
+      const parentTab = w.tabs.find((t) => t.id === w.activeTabId);
+      if (!parentTab) return w;
+      const node = parentTab.nodes.find((n) => n.id === nodeId);
+      const raw =
+        node?.label?.trim() || node?.id || `Canvas ${w.tabs.length + 1}`;
+      const baseName = raw.slice(0, 48);
+
+      const alreadyOpen = w.tabs.find((t) => t.linkedNodeId === nodeId);
+      if (alreadyOpen) {
+        return { ...w, activeTabId: alreadyOpen.id };
+      }
+
+      const closedPayload = w.closedCanvases[nodeId];
+      if (closedPayload) {
+        const { [nodeId]: _removed, ...restClosed } = w.closedCanvases;
+        const childPath =
+          closedPayload.filePath ?? defaultChildCanvasPath(nodeId);
+        const parentRef: CanvasFileParentRef = closedPayload.parentRef ?? {
+          file: parentTab.filePath,
+          tabId: parentTab.id,
+          nodeId,
+        };
+        const restored = toWorkspaceTab({
+          ...closedPayload,
+          linkedNodeId: nodeId,
+          filePath: childPath,
+          parentRef,
+        });
+        const updatedParents = patchParentNodeLink(
+          parentTab.nodes,
+          nodeId,
+          childPath,
+        );
+        return {
+          ...w,
+          tabs: w.tabs
+            .map((t) =>
+              t.id === parentTab.id ? { ...t, nodes: updatedParents } : t,
+            )
+            .concat([restored]),
+          activeTabId: restored.id,
+          closedCanvases: restClosed,
+        };
+      }
+
+      if (!node) return w;
+
+      const newId = `tab-${Date.now()}`;
+      const childPath = defaultChildCanvasPath(nodeId);
+      const parentRef: CanvasFileParentRef = {
+        file: parentTab.filePath,
+        tabId: parentTab.id,
+        nodeId,
+      };
+      const updatedParents = patchParentNodeLink(
+        parentTab.nodes,
+        nodeId,
+        childPath,
+      );
+      const newTab = createWorkspaceTab(newId, baseName, [], [], {
+        linkedNodeId: nodeId,
+        filePath: childPath,
+        parentRef,
+      });
+      return {
+        ...w,
+        tabs: w.tabs
+          .map((t) =>
+            t.id === parentTab.id ? { ...t, nodes: updatedParents } : t,
+          )
+          .concat([newTab]),
+        activeTabId: newId,
+      };
+    });
+  }, []);
+
   const [colorMode, setColorMode] = useState<ColorMode>('light');
   const [edgeType, setEdgeType] = useState<EdgeType>('bezier');
-  const [movingNodeId, setMovingNodeId] = useState<string | null>(null);
-  const [locked, setLocked] = useState(false);
 
   const isDraggingNode = useRef(false);
 
-  // Undo / Redo
-  const [past, setPast] = useState<HistoryEntry[]>([]);
-  const [future, setFuture] = useState<HistoryEntry[]>([]);
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      const files = buildFilesRecord(workspace.tabs, workspace.closedCanvases);
+      saveWorkspaceToStorage(
+        buildWorkspaceSnapshot(
+          workspace.tabs,
+          workspace.activeTabId,
+          workspace.closedCanvases,
+          files,
+        ),
+      );
+    }, 400);
+    return () => window.clearTimeout(id);
+  }, [workspace.tabs, workspace.activeTabId, workspace.closedCanvases]);
+
+  const exportWorkspaceJson = useCallback(() => {
+    const files = buildFilesRecord(workspace.tabs, workspace.closedCanvases);
+    downloadWorkspaceJson(
+      buildWorkspaceSnapshot(
+        workspace.tabs,
+        workspace.activeTabId,
+        workspace.closedCanvases,
+        files,
+      ),
+    );
+  }, [workspace.tabs, workspace.activeTabId, workspace.closedCanvases]);
 
   const pushHistory = useCallback(() => {
-    setPast((p) => [...p, { nodes, edges }].slice(-30));
-    setFuture([]);
-  }, [nodes, edges]);
+    setWorkspace((w) => ({
+      ...w,
+      tabs: w.tabs.map((t) =>
+        t.id === w.activeTabId
+          ? {
+              ...t,
+              past: [...t.past, { nodes: t.nodes, edges: t.edges }].slice(-30),
+              future: [],
+            }
+          : t,
+      ),
+    }));
+  }, []);
 
   const undo = useCallback(() => {
-    setPast((p) => {
-      if (p.length === 0) return p;
-      const prev = p[p.length - 1];
-      setFuture((f) => [{ nodes, edges }, ...f]);
-      setNodes(prev.nodes);
-      setEdges(prev.edges);
-      return p.slice(0, -1);
+    setWorkspace((w) => {
+      const tab = w.tabs.find((t) => t.id === w.activeTabId);
+      if (!tab || tab.past.length === 0) return w;
+      const prev = tab.past[tab.past.length - 1];
+      return {
+        ...w,
+        tabs: w.tabs.map((t) =>
+          t.id === w.activeTabId
+            ? {
+                ...t,
+                nodes: prev.nodes,
+                edges: prev.edges,
+                past: t.past.slice(0, -1),
+                future: [{ nodes: t.nodes, edges: t.edges }, ...t.future],
+              }
+            : t,
+        ),
+      };
     });
-  }, [nodes, edges]);
+  }, []);
 
   const redo = useCallback(() => {
-    setFuture((f) => {
-      if (f.length === 0) return f;
-      const next = f[0];
-      setPast((p) => [...p, { nodes, edges }]);
-      setNodes(next.nodes);
-      setEdges(next.edges);
-      return f.slice(1);
+    setWorkspace((w) => {
+      const tab = w.tabs.find((t) => t.id === w.activeTabId);
+      if (!tab || tab.future.length === 0) return w;
+      const next = tab.future[0];
+      return {
+        ...w,
+        tabs: w.tabs.map((t) =>
+          t.id === w.activeTabId
+            ? {
+                ...t,
+                nodes: next.nodes,
+                edges: next.edges,
+                past: [...t.past, { nodes: t.nodes, edges: t.edges }],
+                future: t.future.slice(1),
+              }
+            : t,
+        ),
+      };
     });
-  }, [nodes, edges]);
+  }, []);
 
   // Context menu
   const { menuPosition, onContextMenu, closeMenu } = useContextMenu();
@@ -245,6 +725,10 @@ const App: React.FC = () => {
       disabled: !selection || selection.kind === 'canvas',
     },
     { label: '', action: () => {}, separator: true },
+    {
+      label: 'Export workspace JSON',
+      action: exportWorkspaceJson,
+    },
     {
       label: colorMode === 'dark' ? 'Light Mode' : 'Dark Mode',
       action: () => setColorMode((m) => (m === 'dark' ? 'light' : 'dark')),
@@ -543,15 +1027,83 @@ const App: React.FC = () => {
 
   return (
     <ColorModeProvider colorMode={colorMode}>
-      <ArtiChartProvider initialNodes={nodes} initialEdges={edges}>
+      <ArtiChartProvider key={activeTabId} initialNodes={nodes} initialEdges={edges}>
         <div className="app" onContextMenu={onContextMenu}>
-          <NodeDrawer
-            onDragStart={handleDrawerDragStart}
-            onDragEnd={handleDrawerDragEnd}
-          />
+          <div className="app-left-drawer">
+            <div
+              className="left-drawer-tabs"
+              role="tablist"
+              aria-label="Left drawer"
+            >
+              <button
+                type="button"
+                role="tab"
+                aria-selected={leftDrawerTab === 'nodes'}
+                className={`left-drawer-tabs__btn${leftDrawerTab === 'nodes' ? ' left-drawer-tabs__btn--active' : ''}`}
+                onClick={() => setLeftDrawerTab('nodes')}
+              >
+                Nodes
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={leftDrawerTab === 'files'}
+                className={`left-drawer-tabs__btn${leftDrawerTab === 'files' ? ' left-drawer-tabs__btn--active' : ''}`}
+                onClick={() => setLeftDrawerTab('files')}
+              >
+                Files
+              </button>
+            </div>
+            {leftDrawerTab === 'nodes' && (
+              <NodeDrawer
+                onDragStart={handleDrawerDragStart}
+                onDragEnd={handleDrawerDragEnd}
+              />
+            )}
+            {leftDrawerTab === 'files' && (
+              <FilesTreePanel
+                files={virtualFiles}
+                rootPath={rootFilePath}
+                activeFilePath={activeTab.filePath}
+                onSelectFile={openTabForFile}
+              />
+            )}
+          </div>
 
           <main className="workspace">
+            <div className="workspace-tabs" role="tablist" aria-label="Canvases">
+              {tabs.map((tab) => (
+                <div
+                  key={tab.id}
+                  className={`workspace-tabs__row${tab.id === activeTabId ? ' workspace-tabs__row--active' : ''}`}
+                >
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={tab.id === activeTabId}
+                    className="workspace-tabs__tab"
+                    onClick={() => selectTab(tab.id)}
+                  >
+                    {tab.cvProps.name || 'Untitled'}
+                  </button>
+                  {tabs.length > 1 && (
+                    <button
+                      type="button"
+                      className="workspace-tabs__close"
+                      aria-label={`Close ${tab.cvProps.name || 'tab'}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        closeTab(tab.id);
+                      }}
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
             <Canvas
+              name={cvProps.name}
               canvasWidth={CANVAS_W}
               canvasHeight={CANVAS_H}
               initialZoom={0.5}
@@ -629,6 +1181,7 @@ const App: React.FC = () => {
                       (selection?.kind === 'multi' && selection.nodeIds.includes(node.id))
                     }
                     onSelect={(id) => setSelection({ kind: 'node', id })}
+                    onDoubleClick={handleNodeDoubleClick}
                     onMove={handleNodeMove}
                     onConnectStart={handleConnectStart}
                     onConnectEnd={wrappedConnectEnd}
@@ -735,7 +1288,7 @@ const App: React.FC = () => {
           <PropertiesDrawer
             selection={selection}
             canvasProps={cvProps}
-            onCanvasChange={(patch) => setCvProps((p) => ({ ...p, ...patch }))}
+            onCanvasChange={setCvProps}
             selectedNode={selectedNode}
             nodes={nodes}
             onNodeChange={updateNode}

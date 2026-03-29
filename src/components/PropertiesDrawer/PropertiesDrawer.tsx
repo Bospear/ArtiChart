@@ -35,6 +35,17 @@ const PropertiesDrawer: React.FC<PropertiesDrawerProps> = ({
           </div>
 
           <label className="artichart-props__field">
+            <span className="artichart-props__label">Name</span>
+            <input
+              className="artichart-props__input"
+              type="text"
+              placeholder="Canvas name…"
+              value={canvasProps.name}
+              onChange={(e) => onCanvasChange({ name: e.target.value })}
+            />
+          </label>
+
+          <label className="artichart-props__field">
             <span className="artichart-props__label">Background Type</span>
             <select
               className="artichart-props__select"

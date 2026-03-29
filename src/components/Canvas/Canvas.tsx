@@ -72,6 +72,7 @@ function getViewportPatternStyle(
 }
 
 const Canvas: React.FC<CanvasProps> = ({
+  name,
   children,
   canvasWidth = DEFAULT_CANVAS_WIDTH,
   canvasHeight = DEFAULT_CANVAS_HEIGHT,
@@ -95,8 +96,9 @@ const Canvas: React.FC<CanvasProps> = ({
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(initialZoom);
   const [size, setSize] = useState({ width: 0, height: 0 });
-  const [isPanning, setIsPanning] = useState(false);
   const [isMinimapDragging, setIsMinimapDragging] = useState(false);
+  /** Panning must use a ref so window mousemove always matches button state (avoids stale isPanning closure). */
+  const isPanningRef = useRef(false);
   const [nodeRects, setNodeRects] = useState<NodeRect[]>([]);
 
   useEffect(() => {
@@ -155,13 +157,21 @@ const Canvas: React.FC<CanvasProps> = ({
     return () => mo.disconnect();
   }, [children]);
 
+  const endCanvasPan = useCallback(() => {
+    if (backgroundClicked.current && !didDrag.current) {
+      onBackgroundClick?.();
+    }
+    backgroundClicked.current = false;
+    isPanningRef.current = false;
+  }, [onBackgroundClick]);
+
   // Left-click drag on canvas or viewport background to pan
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
       const isBackground =
         e.target === canvasRef.current || e.target === viewportRef.current;
       if (e.button === 0 && isBackground) {
-        setIsPanning(true);
+        isPanningRef.current = true;
         didDrag.current = false;
         backgroundClicked.current = true;
         panStart.current = { x: e.clientX, y: e.clientY, panX: pan.x, panY: pan.y };
@@ -172,27 +182,29 @@ const Canvas: React.FC<CanvasProps> = ({
 
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
-      if (isPanning) {
-        const dx = e.clientX - panStart.current.x;
-        const dy = e.clientY - panStart.current.y;
-        if (Math.abs(dx) > 3 || Math.abs(dy) > 3) didDrag.current = true;
-        setPan({
-          x: panStart.current.panX + dx,
-          y: panStart.current.panY + dy,
-        });
+      if (!isPanningRef.current) return;
+      // Stops pan if the left button was released without a mouseup reaching window (or stale listener)
+      if ((e.buttons & 1) === 0) {
+        endCanvasPan();
+        return;
       }
+      const dx = e.clientX - panStart.current.x;
+      const dy = e.clientY - panStart.current.y;
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) didDrag.current = true;
+      setPan({
+        x: panStart.current.panX + dx,
+        y: panStart.current.panY + dy,
+      });
     },
-    [isPanning]
+    [endCanvasPan]
   );
 
   const handleMouseUp = useCallback(() => {
-    if (backgroundClicked.current && !didDrag.current) {
-      onBackgroundClick?.();
+    if (isPanningRef.current) {
+      endCanvasPan();
     }
-    backgroundClicked.current = false;
-    setIsPanning(false);
     setIsMinimapDragging(false);
-  }, [onBackgroundClick]);
+  }, [endCanvasPan]);
 
   useEffect(() => {
     window.addEventListener('mousemove', handleMouseMove);
@@ -353,6 +365,7 @@ const Canvas: React.FC<CanvasProps> = ({
     <div
       ref={containerRef}
       className={`artichart-canvas ${className}`.trim()}
+      aria-label={name}
       onMouseDown={handleMouseDown}
       onWheel={handleWheel}
       onDragOver={handleDragOver}

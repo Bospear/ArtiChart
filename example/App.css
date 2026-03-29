@@ -20,10 +20,134 @@ html, body, #root {
   height: 100%;
 }
 
+.app-left-drawer {
+  display: flex;
+  flex-direction: column;
+  width: 240px;
+  min-width: 240px;
+  height: 100%;
+  background: var(--artichart-node-bg, #fff);
+  border-right: 1px solid #cbd5e1;
+}
+
+.left-drawer-tabs {
+  display: flex;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--artichart-controls-border, #e2e8f0);
+}
+
+.left-drawer-tabs__btn {
+  flex: 1;
+  padding: 10px 8px;
+  border: none;
+  background: var(--artichart-surface, #f8fafc);
+  color: var(--artichart-text-muted, #64748b);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.left-drawer-tabs__btn:hover {
+  color: var(--artichart-text, #334155);
+  background: var(--artichart-toolbar-hover-bg, #f1f5f9);
+}
+
+.left-drawer-tabs__btn--active {
+  color: var(--artichart-text, #0f172a);
+  background: var(--artichart-node-bg, #fff);
+  box-shadow: inset 0 -2px 0 0 #0369a1;
+}
+
+.app-left-drawer .artichart-drawer--left {
+  border-right: none;
+  flex: 1;
+  min-height: 0;
+}
+
 .workspace {
   flex: 1;
   min-width: 0;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.workspace > .artichart-canvas {
+  flex: 1;
+  min-height: 0;
+}
+
+.workspace-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 4px;
+  padding: 8px 10px 0;
+  flex-shrink: 0;
+  background: var(--artichart-surface, #e2e8f0);
+  border-bottom: 1px solid var(--artichart-controls-border, #e2e8f0);
+}
+
+.workspace-tabs__row {
+  display: flex;
+  align-items: stretch;
+  max-width: 220px;
+  border: 1px solid var(--artichart-controls-border, #e2e8f0);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  background: var(--artichart-controls-bg, #fff);
+  overflow: hidden;
+}
+
+.workspace-tabs__row--active {
+  margin-bottom: -1px;
+  font-weight: 600;
+  background: var(--artichart-node-bg, #fff);
+}
+
+.workspace-tabs__tab {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 10px;
+  border: none;
+  background: transparent;
+  color: var(--artichart-text-muted, #64748b);
+  font-size: 13px;
+  font-weight: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+.workspace-tabs__row:not(.workspace-tabs__row--active) .workspace-tabs__tab:hover {
+  color: var(--artichart-text, #1e293b);
+  background: var(--artichart-toolbar-hover-bg, #f8fafc);
+}
+
+.workspace-tabs__row--active .workspace-tabs__tab {
+  color: var(--artichart-text, #1e293b);
+}
+
+.workspace-tabs__close {
+  flex-shrink: 0;
+  width: 28px;
+  padding: 0;
+  border: none;
+  border-left: 1px solid var(--artichart-controls-border, #e2e8f0);
+  background: transparent;
+  color: var(--artichart-text-muted, #94a3b8);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.workspace-tabs__close:hover {
+  color: var(--artichart-text, #1e293b);
+  background: var(--artichart-toolbar-hover-bg, #f1f5f9);
 }
 
 /* ---- Top-right toolbar panel ---- */

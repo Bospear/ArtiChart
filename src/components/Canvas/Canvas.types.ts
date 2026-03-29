@@ -3,6 +3,8 @@ import type { ReactNode } from 'react';
 export type BackgroundType = 'blank' | 'dotted' | 'cross' | 'image';
 
 export interface CanvasProps {
+  /** Display name for the canvas (e.g. tab labels, accessibility) */
+  name?: string;
   /** Content to render inside the canvas (e.g. draggable nodes) */
   children?: ReactNode;
   /** Width of the scrollable canvas area in pixels */

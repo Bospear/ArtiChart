@@ -10,6 +10,8 @@ export type Selection =
   | { kind: 'multi'; nodeIds: string[]; edgeIds: string[] };
 
 export interface CanvasProperties {
+  /** Tab title / canvas label */
+  name: string;
   backgroundType: BackgroundType;
   backgroundImage: string;
 }

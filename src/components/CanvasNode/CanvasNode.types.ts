@@ -48,6 +48,8 @@ export interface CanvasNodeProps {
   zoom?: number;
   children?: ReactNode;
   onSelect?: (id: string) => void;
+  /** Fired on double-click (ignored on connectors and resize handles). */
+  onDoubleClick?: (id: string) => void;
   onMove?: (id: string, x: number, y: number) => void;
   onConnectStart?: (id: string, connectorIndex: number) => void;
   onConnectEnd?: (id: string, connectorIndex: number) => void;
