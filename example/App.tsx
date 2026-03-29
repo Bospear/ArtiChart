@@ -40,6 +40,7 @@ import {
   DATA_KEY_LINK_RECT,
   defaultChildCanvasPath,
   MAIN_CANVAS_FILE,
+  parseCanvasFileDoc,
   type CanvasFileParentRef,
 } from './canvasFileStore';
 import {
@@ -47,6 +48,7 @@ import {
   downloadWorkspaceJson,
   loadWorkspaceFromStorage,
   maxNumericSuffix,
+  nestedNodesToFlat,
   restoreClosedFromSnapshot,
   saveWorkspaceToStorage,
   snapshotToRestoredTabs,
@@ -268,6 +270,30 @@ function tabToRestoredPayload(tab: WorkspaceTab): RestoredTabPayload {
   };
 }
 
+function patchParentNodeLink(
+  nodes: CanvasNodeData[],
+  nodeId: string,
+  childPath: string,
+): CanvasNodeData[] {
+  return nodes.map((n) =>
+    n.id === nodeId
+      ? {
+          ...n,
+          data: {
+            ...(n.data ?? {}),
+            [DATA_KEY_CHILD_CANVAS]: childPath,
+            [DATA_KEY_LINK_RECT]: {
+              x: n.x,
+              y: n.y,
+              width: n.width,
+              height: n.height,
+            },
+          },
+        }
+      : n,
+  );
+}
+
 const App: React.FC = () => {
   const initialTab = useMemo(
     () =>
@@ -450,13 +476,114 @@ const App: React.FC = () => {
     setWorkspace((w) => ({ ...w, activeTabId: id }));
   }, []);
 
-  const openTabForFile = useCallback(
-    (filePath: string) => {
-      const tab = tabs.find((t) => t.filePath === filePath);
-      if (tab) selectTab(tab.id);
-    },
-    [tabs, selectTab],
-  );
+  const handleFileDoubleClick = useCallback((path: string) => {
+    setWorkspace((w) => {
+      const alreadyOpen = w.tabs.find((t) => t.filePath === path);
+      if (alreadyOpen) {
+        return { ...w, activeTabId: alreadyOpen.id };
+      }
+
+      const closedEntry = Object.entries(w.closedCanvases).find(
+        ([, p]) => p.filePath === path,
+      );
+      if (closedEntry) {
+        const [nodeKey, closedPayload] = closedEntry;
+        const { [nodeKey]: _removed, ...restClosed } = w.closedCanvases;
+        const childPath =
+          closedPayload.filePath ?? defaultChildCanvasPath(nodeKey);
+        const parentRef = closedPayload.parentRef;
+        const parentTab = parentRef
+          ? w.tabs.find((t) => t.filePath === parentRef.file)
+          : undefined;
+        const restored = toWorkspaceTab({
+          ...closedPayload,
+          linkedNodeId: nodeKey,
+          filePath: childPath,
+          ...(parentRef !== undefined ? { parentRef } : {}),
+        });
+        let nextTabs = w.tabs;
+        if (parentTab) {
+          nextTabs = w.tabs.map((t) =>
+            t.id === parentTab.id
+              ? {
+                  ...t,
+                  nodes: patchParentNodeLink(
+                    parentTab.nodes,
+                    nodeKey,
+                    childPath,
+                  ),
+                }
+              : t,
+          );
+        }
+        return {
+          ...w,
+          tabs: [...nextTabs, restored],
+          activeTabId: restored.id,
+          closedCanvases: restClosed,
+        };
+      }
+
+      const filesMap = buildFilesRecord(w.tabs, w.closedCanvases);
+      const raw = filesMap[path];
+      if (!raw) return w;
+      const doc = parseCanvasFileDoc(raw);
+      if (!doc) return w;
+
+      if (!doc.linkedNodeId) {
+        return w;
+      }
+
+      const byLink = w.tabs.find((t) => t.linkedNodeId === doc.linkedNodeId);
+      if (byLink) {
+        return { ...w, activeTabId: byLink.id };
+      }
+
+      const linkedNodeId = doc.linkedNodeId;
+      const childPath = doc.path;
+      const parentRef = doc.parent;
+
+      const restored = toWorkspaceTab({
+        id: doc.tabId,
+        filePath: childPath,
+        parentRef: parentRef ?? undefined,
+        linkedNodeId,
+        cvProps: {
+          name: doc.graph.name,
+          backgroundType: doc.graph.canvas.backgroundType,
+          backgroundImage: doc.graph.canvas.backgroundImage,
+        },
+        zoom: doc.graph.zoom,
+        nodes: nestedNodesToFlat(doc.graph.nodes),
+        edges: doc.graph.edges,
+      });
+
+      const parentTab =
+        parentRef !== null && parentRef !== undefined
+          ? w.tabs.find((t) => t.filePath === parentRef.file)
+          : undefined;
+      let nextTabs = w.tabs;
+      if (parentTab && parentRef) {
+        nextTabs = w.tabs.map((t) =>
+          t.id === parentTab.id
+            ? {
+                ...t,
+                nodes: patchParentNodeLink(
+                  parentTab.nodes,
+                  parentRef.nodeId,
+                  childPath,
+                ),
+              }
+            : t,
+        );
+      }
+      return {
+        ...w,
+        tabs: [...nextTabs, restored],
+        activeTabId: restored.id,
+      };
+    });
+  }, []);
 
   const closeTab = useCallback((tabId: string) => {
     setWorkspace((w) => {
@@ -484,29 +611,6 @@ const App: React.FC = () => {
       };
     });
   }, []);
-
-  const patchParentNodeLink = (
-    nodes: CanvasNodeData[],
-    nodeId: string,
-    childPath: string,
-  ): CanvasNodeData[] =>
-    nodes.map((n) =>
-      n.id === nodeId
-        ? {
-            ...n,
-            data: {
-              ...(n.data ?? {}),
-              [DATA_KEY_CHILD_CANVAS]: childPath,
-              [DATA_KEY_LINK_RECT]: {
-                x: n.x,
-                y: n.y,
-                width: n.width,
-                height: n.height,
-              },
-            },
-          }
-        : n,
-    );
 
   const handleNodeDoubleClick = useCallback((nodeId: string) => {
     setWorkspace((w) => {
@@ -1065,7 +1169,7 @@ const App: React.FC = () => {
                 files={virtualFiles}
                 rootPath={rootFilePath}
                 activeFilePath={activeTab.filePath}
-                onSelectFile={openTabForFile}
+                onOpenCanvasFile={handleFileDoubleClick}
               />
             )}
           </div>

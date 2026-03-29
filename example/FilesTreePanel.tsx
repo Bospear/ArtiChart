@@ -69,12 +69,12 @@ function FileTreeRow({
   node,
   depth,
   activePath,
-  onSelect,
+  onOpenCanvasFile,
 }: {
   node: FileTreeNode;
   depth: number;
   activePath: string | null;
-  onSelect?: (path: string) => void;
+  onOpenCanvasFile?: (path: string) => void;
 }) {
   const isActive = activePath === node.path;
   return (
@@ -83,7 +83,10 @@ function FileTreeRow({
         type="button"
         className={`files-tree__row${isActive ? ' files-tree__row--active' : ''}${node.broken ? ' files-tree__row--broken' : ''}`}
         style={{ paddingLeft: 12 + depth * 14 }}
-        onClick={() => onSelect?.(node.path)}
+        onDoubleClick={(e) => {
+          e.preventDefault();
+          if (!node.broken) onOpenCanvasFile?.(node.path);
+        }}
       >
         <span className="files-tree__chevron" aria-hidden>
           {node.children.length > 0 ? '▾' : '·'}
@@ -101,7 +104,7 @@ function FileTreeRow({
               node={c}
               depth={depth + 1}
               activePath={activePath}
-              onSelect={onSelect}
+              onOpenCanvasFile={onOpenCanvasFile}
             />
           ))}
         </ul>
@@ -114,14 +117,15 @@ export interface FilesTreePanelProps {
   files: Record<string, string>;
   rootPath: string;
   activeFilePath: string | null;
-  onSelectFile?: (path: string) => void;
+  /** Double-click a file to focus or open that canvas tab. */
+  onOpenCanvasFile?: (path: string) => void;
 }
 
 const FilesTreePanel: React.FC<FilesTreePanelProps> = ({
   files,
   rootPath,
   activeFilePath,
-  onSelectFile,
+  onOpenCanvasFile,
 }) => {
   const tree = useMemo(() => {
     if (!rootPath) return null;
@@ -131,9 +135,9 @@ const FilesTreePanel: React.FC<FilesTreePanelProps> = ({
   return (
     <div className="files-tree files-tree--panel">
       <p className="files-tree__hint">
-        Each sub-canvas is a JSON file. Parent nodes store{' '}
-        <code>data.artichartChildCanvas</code> and link geometry in{' '}
-        <code>artichartLinkRect</code>.
+        Double-click a file to open that canvas (or switch to it if it is already
+        open). Parent nodes store <code>data.artichartChildCanvas</code> and link
+        geometry in <code>artichartLinkRect</code>.
       </p>
       {!tree || tree.broken ? (
         <p className="files-tree__empty">No file graph yet (save to generate).</p>
@@ -143,7 +147,7 @@ const FilesTreePanel: React.FC<FilesTreePanelProps> = ({
             node={tree}
             depth={0}
             activePath={activeFilePath}
-            onSelect={onSelectFile}
+            onOpenCanvasFile={onOpenCanvasFile}
           />
         </ul>
       )}
